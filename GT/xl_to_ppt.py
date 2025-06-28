@@ -195,6 +195,7 @@ def generate_bullet_points_for_chart(df: pd.DataFrame, col: str, chart_type: str
         mean_score = valid_data_filtered.mean()
         bullet_points = [
             f"Total {total} records analyzed with average score of {mean_score:.1f}",
+            "Risk score classification is based on percentage scores derived from the original scale: High risk (<60%), Medium risk (60-90%), Low risk (>=90%)",
             f"High risk sites represent {high_pct:.1f}% ({high}) of total records",
             f"Medium risk sites account for {medium_pct:.1f}% ({medium}) of total records",
             f"Low risk sites account for {low_pct:.1f}% ({low}) of total records",
@@ -244,7 +245,7 @@ def generate_bullet_points_for_chart(df: pd.DataFrame, col: str, chart_type: str
                 bullet_points.append(f"No valid (non-NaN) categorical data found for {col}.")
         else:
             bullet_points.append(f"No valid (non-NaN) categorical data found for {col}.")
-    return bullet_points[:4]
+    return bullet_points
 
 def generate_hexbin_bullet_points(df: pd.DataFrame, x_col: str, y_col: str) -> List[str]:
     corr = df[x_col].corr(df[y_col])
@@ -347,7 +348,7 @@ def visualize_column_summary(active_sites_df: pd.DataFrame) -> Tuple[List[Tuple[
                     fig1, ax1 = plt.subplots(figsize=(10, 6))
                     high, medium, low = get_risk_counts(valid_numerical_data)
                     risk_counts = [high, medium, low]
-                    risk_labels = ['High Risk (< 60)', 'Medium Risk (60-89)', 'Low Risk (>= 90)']
+                    risk_labels = ['High Risk ', 'Medium Risk ', 'Low Risk ']
                     colors_for_risk_pie = random.sample(color_palette, k=min(len(risk_labels), len(color_palette)))
                     explode_values = [0.05 if i == 0 and high > 0 else 0 for i in range(len(risk_labels))]
                     ax1.pie(
@@ -450,13 +451,13 @@ BULLET_SPACE_AFTER = Pt(12)
 TOP_MARGIN_RATIO = 0.06
 BOTTOM_MARGIN_RATIO = 0.08
 LEFT_MARGIN_RATIO = 0.06
-RIGHT_MARGIN_RATIO = 0.06
+RIGHT_MARGIN_RATIO = 0.04
 TITLE_HEIGHT_RATIO = 0.20
 CONTENT_HEIGHT_RATIO = 1 - TITLE_HEIGHT_RATIO
 TITLE_WIDTH_RATIO = 0.70
-TEXT_WIDTH_RATIO = 0.30
-IMAGE_WIDTH_RATIO = 0.70
-GAP_BETWEEN_TEXT_AND_IMAGE_RATIO = 0.02
+TEXT_WIDTH_RATIO = 0.35
+IMAGE_WIDTH_RATIO = 0.65
+GAP_BETWEEN_TEXT_AND_IMAGE_RATIO = 0.005
 
 def bolden_values_paragraph(p, text):
     """Add bullet point with bolded numbers/percentages in the paragraph p."""
