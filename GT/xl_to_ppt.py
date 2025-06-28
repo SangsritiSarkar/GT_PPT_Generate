@@ -98,6 +98,40 @@ def parse_score_advanced(score_str):
         pass
     return np.nan
 
+
+def identify_id_columns_by_pattern(df, patterns=None, verbose=False):
+    
+    if patterns is None:
+        patterns = [
+            r'\b(?:id|no|num|number|key|serial|code|idx)\b', 
+            r'_id\b',       
+            r'id_',          
+            r'sl_no',       
+            r'reference',  
+            r'ref\b'        
+        ]
+    elif isinstance(patterns, str):
+        patterns = [patterns] 
+
+    potential_id_columns = set()
+
+    for col in df.columns:
+        original_col_name = col
+        normalized_col_name = normalize_col_name(col)
+
+        if verbose:
+            print(f"\n--- Analyzing column: '{original_col_name}' (Normalized: '{normalized_col_name}') ---")
+
+        for pattern in patterns:
+            if re.search(pattern, normalized_col_name, re.IGNORECASE):
+                potential_id_columns.add(original_col_name)
+                if verbose:
+                    print(f"  - Flagged by: Column name matches pattern '{pattern}'")
+                break
+
+    return list(potential_id_columns)
+
+
 def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans and normalizes the loaded DataFrame."""
 
@@ -294,9 +328,12 @@ def plot_categorical_bar(ax, value_counts: pd.Series, col: str, clean_title: str
 def visualize_column_summary(active_sites_df: pd.DataFrame) -> Tuple[List[Tuple[Any, str, List[str]]], List[str]]:
     sns.set_style("whitegrid")
     color_palette = ['#9370DB', '#FF6347', '#FFB300', '#32CD32', '#27AEEF']
-    cols_to_exclude = [normalize_col_name('id')]
+    
+    raw_cols_to_exclude = identify_id_columns_by_pattern(active_sites_df, verbose=True)
+    normalized_cols_to_exclude_set = {normalize_col_name(col) for col in raw_cols_to_exclude}
+    
     score_keyword = 'score'
-    cols_for_viz = [col for col in active_sites_df.columns if normalize_col_name(col) not in cols_to_exclude]
+    cols_for_viz = [col for col in active_sites_df.columns if normalize_col_name(col) not in normalized_cols_to_exclude_set]
     chart_data = []
     for col in cols_for_viz:
         clean_title = col.replace('_', ' ').replace('-', ' ').title()
